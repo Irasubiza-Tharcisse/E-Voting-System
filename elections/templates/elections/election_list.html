@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Elections{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5 align-items-end">
+        <div class="col-lg-8 text-center text-lg-start">
+            <h1 class="fw-bold brand-text-dark text-uppercase tracking-wider mb-2">Current Elections</h1>
+            <div class="brand-divider mb-3 mx-auto mx-lg-0"></div>
+            <p class="text-secondary fs-5 mb-0">Select an active session below to participate in the democratic process.</p>
+        </div>
+        <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+            <div class="badge rounded-pill bg-dark px-4 py-2 small fw-bold tracking-tight">
+                <i class="bi bi-person-check-fill me-2 brand-text-red"></i> VERIFIED VOTER
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for election in elections %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 brand-card-hover h-100 overflow-hidden">
+                <div class="position-absolute top-0 end-0 p-3 z-index-2">
+                    {% if election.is_active %}
+                        <span class="badge rounded-pill brand-badge-active px-3 shadow-sm">
+                            <i class="bi bi-record-fill animate-pulse me-1"></i> LIVE
+                        </span>
+                    {% else %}
+                        <span class="badge rounded-pill bg-dark px-3 opacity-75">CLOSED</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-body p-4 pt-5 d-flex flex-column">
+                    <h3 class="card-title fw-bold brand-text-dark mb-3">{{ election.title }}</h3>
+                    <p class="card-text text-secondary mb-4 line-clamp-3 small lh-base">
+                        {{ election.description|default:"Cast your vote to decide the leadership for this upcoming term." }}
+                    </p>
+
+                    <div class="mb-4 mt-auto">
+                        <label class="brand-label-sm d-block mb-3">Featured Candidates</label>
+                        <div class="avatar-stack d-flex align-items-center">
+                            {% for position in election.positions.all|slice:":1" %} 
+                                {% for candidate in position.candidates.all|slice:":5" %}
+                                    <div class="stack-item" data-bs-toggle="tooltip" title="{{ candidate.name }} ({{ position.title }})">
+                                        <img src="{% if candidate.photo %}{{ candidate.photo.url }}{% else %}/static/images/default-user.png{% endif %}" 
+                                             class="brand-squircle-avatar border border-2 border-white shadow-sm" 
+                                             alt="{{ candidate.name }}">
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                            
+                            {% if election.total_candidates > 5 %}
+                            <div class="stack-count ms-2">
+                                <span class="badge rounded-pill bg-light text-dark border small fw-bold">+{{ election.total_candidates|add:"-5" }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="brand-divider-faint mb-4"></div>
+
+                    <div class="row g-2">
+                        {% if election.is_active %}
+                        <div class="col-12">
+                            <a href="{% url 'vote' election.id %}" class="btn brand-btn-primary w-100 rounded-pill fw-bold py-3 shadow">
+                                CAST YOUR VOTE
+                            </a>
+                        </div>
+                        {% endif %}
+                        <div class="col-12">
+                            <a href="{% url 'results' election.id %}" class="btn btn-outline-dark w-100 rounded-pill py-2 fw-bold small">
+                                <i class="bi bi-graph-up-arrow me-2"></i> VIEW LIVE RESULTS
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="brand-empty-state mb-4">
+                <i class="bi bi-clipboard-x display-1 brand-text-red opacity-25"></i>
+            </div>
+            <h3 class="fw-bold brand-text-dark">No Active Elections</h3>
+            <p class="text-secondary mx-auto mt-2" style="max-width: 400px;">
+                There are currently no polls open. You will be notified via your student email when a new session is initialized.
+            </p>
+            <a href="/" class="btn btn-dark rounded-pill px-4 mt-3 fw-bold">REFRESH DASHBOARD</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-red { color: var(--brand-red) !important; }
+    .brand-text-dark { color: var(--brand-dark) !important; }
+    .brand-divider { width: 50px; height: 4px; background: var(--brand-red); border-radius: 2px; }
+    .brand-divider-faint { width: 100%; height: 1px; background: rgba(0,0,0,0.05); }
+    .brand-label-sm { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #888; }
+    .tracking-wider { letter-spacing: 2px; }
+
+    /* Card Hover & Style */
+    .brand-card-hover {
+        background-color: #ffffff;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .brand-card-hover:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Requirement: Display Profile Pics (using institutional squircle) */
+    .avatar-stack { margin-left: 8px; }
+    .stack-item { margin-left: -10px; transition: all 0.2s ease; }
+    .stack-item:hover { transform: translateY(-5px) scale(1.1); z-index: 10; }
+    
+    .brand-squircle-avatar {
+        width: 42px; height: 42px;
+        border-radius: 12px; /* Consistent squircle style */
+        object-fit: cover;
+    }
+
+    /* Pulse for Active Status */
+    .brand-badge-active {
+        background-color: var(--brand-red);
+        color: white;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+    .animate-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    /* Buttons */
+    .brand-btn-primary {
+        background-color: var(--brand-red) !important;
+        border: none; color: white !important;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+    .brand-btn-primary:hover { background-color: #8a1b1b !important; transform: scale(1.02); }
+
+    /* Line Clamp */
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
+    }
+
+    [data-bs-theme="dark"] .brand-card-hover { background-color: #1a1a1a; }
+    [data-bs-theme="dark"] .brand-divider-faint { background: rgba(255,255,255,0.1); }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el) })
+    })
+</script>
+{% endblock %}

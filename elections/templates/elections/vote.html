@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Vote: {{ election.title }}{% endblock %}
+
+{% block content %}
+<script>
+    const endDate = new Date("{{ election.end_time|date:'Y-m-d H:i:s' }}").getTime();
+
+    const timer = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = endDate - now;
+
+        const display = document.getElementById("countdown");
+        const submitBtn = document.getElementById("submitBallot");
+        const cardInputs = document.querySelectorAll('.card-input-element');
+
+        if (distance < 0) {
+            clearInterval(timer);
+            display.innerHTML = "POLLS CLOSED";
+            display.parentElement.classList.replace('brand-timer-active', 'brand-timer-closed');
+            
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-lock-fill me-2"></i> VOTING PERIOD ENDED';
+                submitBtn.classList.replace('brand-btn-primary', 'btn-secondary');
+            }
+
+            cardInputs.forEach(input => { input.disabled = true; });
+        } else {
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            let timeString = "";
+            if (days > 0) timeString += days + "d ";
+            timeString += hours.toString().padStart(2, '0') + ":" + 
+                         minutes.toString().padStart(2, '0') + ":" + 
+                         seconds.toString().padStart(2, '0');
+            
+            display.innerHTML = timeString;
+        }
+    }, 1000);
+</script>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold brand-text-dark text-uppercase tracking-wider mb-3">{{ election.title }}</h1>
+        <div class="brand-divider mx-auto mb-4"></div>
+        
+        <div class="d-flex justify-content-center mb-4">
+            <div class="brand-timer-active px-4 py-2 rounded-pill d-flex align-items-center shadow-sm">
+                <i class="bi bi-clock-history me-2 pulse-icon"></i>
+                <span class="x-small fw-bold text-uppercase me-2">Polls Closing:</span>
+                <span id="countdown" class="brand-mono fw-bold fs-5">--:--:--</span>
+            </div>
+        </div>
+
+        <div class="badge brand-badge-outline px-3 py-2">
+            <i class="bi bi-shield-lock-fill me-2 brand-text-red"></i> SECURE ANONYMOUS BALLOT
+        </div>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger border-0 rounded-4 shadow-sm mb-5 p-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-octagon-fill fs-3 me-3"></i>
+            <div>
+                <h6 class="fw-bold mb-1">BALLOT VALIDATION ERROR</h6>
+                <p class="small mb-0 opacity-75">Please ensure you have selected candidates for all required positions.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" id="votingForm">
+        {% csrf_token %}
+
+        {% for position in election.positions.all %}
+        <div class="ballot-section mb-5 p-4 p-md-5 rounded-4 bg-white shadow-sm border">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+                <div class="d-flex align-items-center">
+                    <div class="brand-step-circle me-3">{{ forloop.counter }}</div>
+                    <div>
+                        <h3 class="fw-bold brand-text-dark mb-0">{{ position.title }}</h3>
+                        <p class="x-small text-secondary fw-bold text-uppercase mb-0 mt-1">Official Election Role</p>
+                    </div>
+                </div>
+                <span class="badge rounded-pill bg-dark px-3 py-2 small fw-bold">
+                    SELECT {{ position.max_votes|default:"1" }} CANDIDATE(S)
+                </span>
+            </div>
+
+            <div class="row g-4">
+                {% for candidate in position.candidates.all %}
+                <div class="col-md-6 col-lg-4">
+                    <label class="candidate-wrapper w-100">
+                        <input type="radio" name="position_{{ position.id }}" value="{{ candidate.id }}" class="card-input-element" required>
+                        
+                        <div class="card h-100 border-0 candidate-card brand-card-light">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-4 position-relative d-inline-block">
+                                    <img src="{% if candidate.photo %}{{ candidate.photo.url }}{% else %}/static/images/default.png{% endif %}" 
+                                         class="brand-squircle-avatar shadow" 
+                                         alt="{{ candidate.name }}">
+                                    <div class="brand-selection-overlay">
+                                        <i class="bi bi-check-lg text-white fs-2"></i>
+                                    </div>
+                                </div>
+
+                                <h5 class="fw-bold brand-text-dark mb-1">{{ candidate.name }}</h5>
+                                <div class="brand-divider-sm mx-auto mb-3"></div>
+
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none brand-text-red fw-bold x-small" 
+                                        data-bs-toggle="modal" data-bs-target="#manifesto{{ candidate.id }}">
+                                    VIEW MANIFESTO <i class="bi bi-chevron-right ms-1"></i>
+                                </button>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 pb-4 text-center">
+                                <span class="btn brand-btn-outline-red rounded-pill px-4 fw-bold x-small">SELECT CANDIDATE</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="modal fade" id="manifesto{{ candidate.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <div class="modal-body p-0">
+                                <div class="row g-0">
+                                    <div class="col-md-4 bg-dark d-flex flex-column align-items-center justify-content-center p-5 text-center">
+                                        <img src="{% if candidate.photo %}{{ candidate.photo.url }}{% else %}/static/images/default.png{% endif %}" 
+                                             class="brand-squircle-avatar mb-3" style="width: 120px; height: 120px;">
+                                        <h4 class="fw-bold text-white mb-0">{{ candidate.name }}</h4>
+                                        <p class="brand-text-red x-small fw-bold text-uppercase">{{ position.title }}</p>
+                                    </div>
+                                    <div class="col-md-8 p-5 bg-white">
+                                        <div class="d-flex justify-content-between align-items-start mb-4">
+                                            <h5 class="fw-bold brand-text-dark mb-0 text-uppercase tracking-wider">Candidate Statement</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="brand-manifesto-content text-secondary lh-lg">
+                                            {{ candidate.manifesto|linebreaks }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="card border-0 shadow-lg brand-sticky-footer rounded-4 mt-5">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center p-4">
+                <div class="mb-3 mb-md-0 text-center text-md-start">
+                    <h5 class="fw-bold brand-text-dark mb-0">Confirm Your Selections</h5>
+                    <p class="x-small text-secondary mb-0">Your vote is final and cannot be altered after submission.</p>
+                </div>
+                <button type="submit" id="submitBallot" class="btn brand-btn-primary btn-lg px-5 rounded-pill shadow-lg fw-bold">
+                    SUBMIT FINAL BALLOT <i class="bi bi-shield-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-red { color: var(--brand-red) !important; }
+    .brand-text-dark { color: var(--brand-dark) !important; }
+    .brand-mono { font-family: 'Courier New', Courier, monospace; }
+    .brand-divider { width: 60px; height: 4px; background: var(--brand-red); border-radius: 2px; }
+    .brand-divider-sm { width: 30px; height: 2px; background: rgba(0,0,0,0.1); }
+    .x-small { font-size: 0.7rem; }
+    .tracking-wider { letter-spacing: 2px; }
+
+    /* Timer Styles */
+    .brand-timer-active { background-color: #fceaea; color: var(--brand-red); border: 1px solid rgba(163, 32, 32, 0.2); }
+    .brand-timer-closed { background-color: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; }
+    .pulse-icon { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    /* Ballot Design */
+    .brand-step-circle {
+        width: 35px; height: 35px; background: var(--brand-dark); color: white;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;
+    }
+    .brand-badge-outline { border: 1px solid #eee; background: white; color: #666; font-weight: 700; font-size: 0.7rem; letter-spacing: 1px; }
+
+    /* Candidate Cards (Squircle Requirement) */
+    .card-input-element { display: none; }
+    .brand-squircle-avatar {
+        width: 140px; height: 140px; object-fit: cover;
+        border-radius: 24px; /* Signature Squircle */
+        transition: transform 0.3s ease;
+    }
+
+    .candidate-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent !important;
+        border-radius: 24px;
+    }
+    .brand-card-light { background-color: #fbfbfb; }
+
+    .brand-selection-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(163, 32, 32, 0.8);
+        border-radius: 24px; display: flex; align-items: center; justify-content: center;
+        opacity: 0; transform: scale(0.9); transition: all 0.2s ease;
+    }
+
+    .card-input-element:checked + .candidate-card {
+        border-color: var(--brand-red) !important;
+        background-color: white !important;
+        box-shadow: 0 10px 30px rgba(163, 32, 32, 0.1) !important;
+    }
+    .card-input-element:checked + .candidate-card .brand-selection-overlay { opacity: 1; transform: scale(1); }
+    .card-input-element:checked + .candidate-card .brand-btn-outline-red { background: var(--brand-red); color: white; }
+
+    /* Sticky Footer */
+    .brand-sticky-footer {
+        position: sticky; bottom: 2rem; z-index: 1020;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(0,0,0,0.05) !important;
+    }
+
+    /* Buttons */
+    .brand-btn-primary { background: var(--brand-red) !important; color: white !important; border: none; letter-spacing: 1px; }
+    .brand-btn-outline-red { border: 1px solid var(--brand-red); color: var(--brand-red); background: transparent; }
+
+    [data-bs-theme="dark"] .ballot-section, [data-bs-theme="dark"] .brand-sticky-footer { background-color: #1a1a1a; }
+</style>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Position | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-7">
+            
+            <div class="mb-5 text-center text-md-start">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none brand-text-red fw-bold small">DASHBOARD</a></li>
+                        <li class="breadcrumb-item active small text-uppercase tracking-wider" aria-current="page">New Role</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold brand-text-dark text-uppercase mb-0">Initialize Position</h2>
+                <div class="brand-divider mt-2 d-none d-md-block"></div>
+                <p class="text-secondary mt-2">Election: <span class="fw-bold brand-text-red">{{ election.title }}</span></p>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4 brand-card overflow-hidden">
+                <div class="card-header bg-dark text-white py-3 px-4 border-0">
+                    <h5 class="card-title mb-0 small fw-bold text-uppercase tracking-wider">
+                        <i class="bi bi-plus-square me-2 brand-text-red"></i> Position Details
+                    </h5>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="text-center mb-5">
+                            <label class="brand-label d-block mb-3">Position Icon / Logo</label>
+                            <div class="position-relative d-inline-block">
+                                <div class="brand-squircle-preview mx-auto shadow-sm">
+                                    <i class="bi bi-person-badge fs-1 text-muted"></i>
+                                </div>
+                                <label for="id_image" class="btn btn-sm btn-dark rounded-circle position-absolute bottom-0 end-0 mb-n1 me-n1 shadow-sm border border-2 border-white">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                            </div>
+                            <p class="x-small text-muted mt-3">Upload a graphic or leave empty for default icon</p>
+                        </div>
+
+                        <div class="row g-4">
+                            {% for field in form %}
+                            <div class="col-12">
+                                <label for="{{ field.id_for_label }}" class="brand-label">
+                                    {{ field.label }}
+                                </label>
+                                
+                                <div class="brand-input-wrapper">
+                                    {% if field.name == 'title' %}
+                                        <i class="bi bi-type-h1 ms-3"></i>
+                                    {% elif field.name == 'max_votes' %}
+                                        <i class="bi bi-check2-all ms-3"></i>
+                                    {% else %}
+                                        <i class="bi bi-pencil-square ms-3"></i>
+                                    {% endif %}
+                                    
+                                    {{ field }}
+                                </div>
+
+                                {% if field.help_text %}
+                                    <div class="form-text ms-3 x-small opacity-75">{{ field.help_text }}</div>
+                                {% endif %}
+                                
+                                {% for error in field.errors %}
+                                    <div class="text-danger x-small mt-1 ms-3 fw-bold">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <hr class="my-5 border-secondary-subtle">
+
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                            <a href="javascript:history.back()" class="btn btn-outline-dark rounded-pill px-4 fw-bold small">
+                                <i class="bi bi-arrow-left me-1"></i> CANCEL
+                            </a>
+                            <button type="submit" class="btn brand-btn-primary rounded-pill px-5 py-3 fw-bold shadow">
+                                <i class="bi bi-check-lg me-2"></i> CREATE POSITION
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-red { color: var(--brand-red) !important; }
+    .brand-text-dark { color: var(--brand-dark) !important; }
+    .brand-divider { width: 60px; height: 4px; background: var(--brand-red); border-radius: 2px; }
+    .x-small { font-size: 0.7rem; }
+    .tracking-wider { letter-spacing: 1.5px; }
+    .brand-label { font-size: 0.7rem; font-weight: 700; text-uppercase: uppercase; color: #666; letter-spacing: 1px; margin-left: 1rem; margin-bottom: 0.5rem; display: block; }
+
+    /* Squircle Icon Style */
+    .brand-squircle-preview {
+        width: 100px;
+        height: 100px;
+        background-color: var(--bs-body-bg);
+        border: 2px solid #eee;
+        border-radius: 18px; /* The Squircle */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /* Seamless Pill Inputs (Consistent with Login/Registration) */
+    .brand-input-wrapper {
+        display: flex; align-items: center;
+        background-color: var(--bs-body-bg);
+        border: 1.5px solid var(--bs-border-color);
+        border-radius: 50rem;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+    .brand-input-wrapper i { color: #adb5bd; transition: color 0.2s; }
+    
+    /* Targeting Django form widgets */
+    .brand-input-wrapper input, 
+    .brand-input-wrapper select, 
+    .brand-input-wrapper textarea {
+        border: none !important; background: transparent !important;
+        box-shadow: none !important; padding: 0.8rem 1rem !important;
+        flex: 1; color: var(--bs-body-color); font-weight: 500; width: 100%;
+    }
+
+    .brand-input-wrapper:focus-within {
+        border-color: var(--brand-red) !important;
+        box-shadow: 0 0 0 4px rgba(163, 32, 32, 0.1) !important;
+    }
+    .brand-input-wrapper:focus-within i { color: var(--brand-red); }
+
+    .brand-btn-primary {
+        background-color: var(--brand-red) !important;
+        border: none; color: white !important;
+        letter-spacing: 1px;
+    }
+
+    [data-bs-theme="dark"] .brand-card { background-color: #1a1a1a; }
+    [data-bs-theme="dark"] .brand-squircle-preview { border-color: #333; }
+</style>
+{% endblock %}

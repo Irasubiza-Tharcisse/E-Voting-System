@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Register | Election System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-12 col-md-10 col-lg-8">
+            
+            <div class="text-center mb-5">
+                <div class="brand-sq-icon mb-3">
+                    <i class="bi bi-person-plus-fill text-white fs-2"></i>
+                </div>
+                <h2 class="fw-bold brand-text-dark text-uppercase">Join the Election</h2>
+                <div class="brand-divider mx-auto"></div>
+                <p class="text-secondary small mt-3">Access is restricted. Admin approval is required after registration.</p>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4 brand-card overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    
+                    {% if form.errors %}
+                    <div class="alert brand-alert border-0 small shadow-sm mb-4">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Please fix the highlighted errors.
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label brand-label">Username</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-at ms-3"></i>
+                                    {{ form.username }}
+                                </div>
+                                {% if form.username.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.username.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label brand-label">Register As</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-shield-lock ms-3"></i>
+                                    <select name="role" class="form-select border-0 bg-transparent shadow-none">
+                                        <option value="voter">Voter (User)</option>
+                                        <option value="admin">Administrator</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label brand-label">Email Address</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-envelope ms-3"></i>
+                                    {{ form.email }}
+                                </div>
+                                {% if form.email.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.email.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label brand-label">Password</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-lock ms-3"></i>
+                                    {{ form.password1 }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label brand-label">Confirm Password</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-check-all ms-3"></i>
+                                    {{ form.password2 }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-body-secondary rounded-4 small">
+                            <p class="mb-2 fw-bold opacity-75">Password requirements:</p>
+                            <div class="row">
+                                <div class="col-sm-4 mb-1 mb-sm-0" id="len"><i class="bi bi-circle me-1"></i> 8+ characters</div>
+                                <div class="col-sm-4 mb-1 mb-sm-0" id="num"><i class="bi bi-circle me-1"></i> 1+ Number</div>
+                                <div class="col-sm-4" id="cap"><i class="bi bi-circle me-1"></i> 1+ Uppercase</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn brand-btn-primary btn-lg rounded-pill fw-bold py-3 shadow">
+                                CREATE ACCOUNT
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted">Already have an account? <a href="{% url 'login' %}" class="text-decoration-none brand-accent-text">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* --- Brand Color Definitions --- */
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-dark { color: var(--brand-dark); letter-spacing: 1px; }
+    .brand-accent-text { color: var(--brand-red); font-weight: 700; }
+    .brand-label { font-size: 0.7rem; font-weight: 700; text-uppercase: uppercase; color: #666; letter-spacing: 0.5px; margin-left: 1rem; }
+    .x-small { font-size: 0.75rem; }
+
+    /* Divider */
+    .brand-divider { width: 50px; height: 3px; background-color: var(--brand-red); border-radius: 2px; }
+
+    /* Logo Squircle */
+    .brand-sq-icon {
+        background-color: var(--brand-red);
+        width: 60px; height: 60px; line-height: 60px;
+        border-radius: 16px; display: inline-block;
+        box-shadow: 0 10px 20px rgba(163, 32, 32, 0.2);
+    }
+
+    /* Seamless Pill Inputs */
+    .brand-input-wrapper {
+        display: flex; align-items: center;
+        background-color: var(--bs-body-bg);
+        border: 1.5px solid var(--bs-border-color);
+        border-radius: 50rem;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+
+    .brand-input-wrapper i { color: #adb5bd; transition: color 0.2s; }
+
+    .brand-input-wrapper input, .brand-input-wrapper select {
+        border: none !important; background: transparent !important;
+        box-shadow: none !important; padding: 0.7rem 1rem !important;
+        flex: 1; color: var(--bs-body-color); font-weight: 500;
+    }
+
+    .brand-input-wrapper:focus-within {
+        border-color: var(--brand-red) !important;
+        box-shadow: 0 0 0 4px rgba(163, 32, 32, 0.1) !important;
+    }
+
+    .brand-input-wrapper:focus-within i { color: var(--brand-red); }
+
+    /* Action Button */
+    .brand-btn-primary {
+        background-color: var(--brand-red) !important;
+        border: none !important; color: white !important;
+        transition: transform 0.2s;
+    }
+
+    .brand-btn-primary:hover {
+        transform: translateY(-2px);
+        background-color: #8a1b1b !important;
+    }
+
+    /* Validation States */
+    .text-success-brand { color: #198754 !important; font-weight: bold; }
+    .text-success-brand i::before { content: "\f26a"; }
+
+    [data-bs-theme="dark"] .brand-card { background-color: #1a1a1a; }
+</style>
+
+<script>
+    const pwd = document.querySelector('input[name="password1"]');
+    if (pwd) {
+        pwd.addEventListener('input', () => {
+            const v = pwd.value;
+            const update = (id, condition) => {
+                const el = document.getElementById(id);
+                el.className = condition ? 'col-sm-4 text-success-brand' : 'col-sm-4';
+                el.querySelector('i').className = condition ? 'bi bi-check-circle-fill me-1' : 'bi bi-circle me-1';
+            };
+            update('len', v.length >= 8);
+            update('num', /[0-9]/.test(v));
+            update('cap', /[A-Z]/.test(v));
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Management | Election Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-8 text-center text-md-start">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none brand-text-red fw-bold small">DASHBOARD</a></li>
+                    <li class="breadcrumb-item active small text-uppercase tracking-wider" aria-current="page">Security</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold brand-text-dark text-uppercase mb-0">Admin Management</h2>
+            <div class="brand-divider mt-2 d-none d-md-block"></div>
+            <p class="text-secondary small mt-2">Review and authorize staff access to the election controls.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-4 mt-md-0">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-dark rounded-pill px-4 shadow-sm fw-bold small">
+                <i class="bi bi-arrow-left me-2"></i> BACK TO DASHBOARD
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 brand-card-warning">
+                <div class="d-flex align-items-center">
+                    <div class="brand-icon-box-warning me-3">
+                        <i class="bi bi-hourglass-split fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary mb-0 small text-uppercase fw-bold tracking-tight">Pending Requests</h6>
+                        <h4 class="mb-0 fw-bold brand-text-dark">{{ pending_admins|length }} Waiting</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden brand-main-card">
+        <div class="card-header bg-dark text-white py-3 px-4 d-flex justify-content-between align-items-center border-0">
+            <h5 class="mb-0 small fw-bold text-uppercase tracking-wider">Access Requests</h5>
+            <span class="badge rounded-pill brand-badge-red px-3 py-2 small">ACTION REQUIRED</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-body-secondary text-secondary small text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3" style="width: 30%;">User Profile</th>
+                        <th style="width: 30%;">Contact Email</th>
+                        <th style="width: 20%;">Registration Date</th>
+                        <th class="text-end pe-4" style="width: 20%;">Authorization</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for admin in pending_admins %}
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="brand-avatar-placeholder-sm me-3 shadow-sm">
+                                    {{ admin.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold brand-text-dark">{{ admin.username }}</h6>
+                                    <span class="x-small brand-text-red fw-bold text-uppercase">Admin Applicant</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-envelope-at me-2 opacity-50"></i>
+                                <span class="text-muted fw-medium">{{ admin.email }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar3 me-2 opacity-50"></i>
+                                <span class="small text-secondary">{{ admin.date_joined|date:"M d, Y" }}</span>
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                <form action="{% url 'approve_admin' admin.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn brand-btn-success rounded-pill px-3 shadow-sm fw-bold x-small">
+                                        APPROVE
+                                    </button>
+                                </form>
+                                
+                                <form action="{% url 'deny_admin' admin.id %}" method="post" 
+                                      onsubmit="return confirm('Denying this request will delete the user account permanently. Continue?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger rounded-pill px-3 fw-bold x-small">
+                                        DENY
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="brand-text-red opacity-25 mb-3">
+                                <i class="bi bi-shield-lock-fill display-1"></i>
+                            </div>
+                            <h5 class="fw-bold brand-text-dark">Security Queue Clear</h5>
+                            <p class="text-muted mb-0 small">There are no new administrator accounts awaiting approval.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+        --brand-gold: #D4AF37; /* For "Warning" states to feel more premium */
+    }
+
+    .brand-text-red { color: var(--brand-red) !important; }
+    .brand-text-dark { color: var(--brand-dark) !important; }
+    .brand-divider { width: 60px; height: 4px; background: var(--brand-red); border-radius: 2px; }
+    .x-small { font-size: 0.7rem; }
+    .tracking-wider { letter-spacing: 1.5px; }
+
+    /* Stats Box Styles */
+    .brand-icon-box-warning {
+        background-color: var(--brand-gold);
+        width: 50px; height: 50px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+    }
+    .brand-card-warning { border-left: 4px solid var(--brand-gold); background-color: #fff9e6; }
+
+    /* Avatar Squircles */
+    .brand-avatar-placeholder-sm {
+        width: 42px; height: 42px;
+        background: var(--brand-dark);
+        color: white;
+        border-radius: 12px; /* Consistent Squircle */
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.1rem;
+    }
+
+    /* Buttons */
+    .brand-btn-success {
+        background-color: #1a5a30 !important; /* Dark Forest Green for Approval */
+        border: none; color: white !important;
+    }
+    .brand-badge-red {
+        background-color: rgba(163, 32, 32, 0.1);
+        color: var(--brand-red);
+        border: 1px solid rgba(163, 32, 32, 0.2);
+    }
+
+    .brand-main-card { background-color: var(--bs-body-tertiary); }
+
+    /* Table Hover Styling */
+    .table-hover tbody tr:hover {
+        background-color: white !important;
+        box-shadow: inset 4px 0 0 var(--brand-red);
+    }
+
+    [data-bs-theme="dark"] .table-hover tbody tr:hover { background-color: #1e1e1e !important; }
+</style>
+{% endblock %}

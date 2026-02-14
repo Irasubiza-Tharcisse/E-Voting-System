@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Election | Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            
+            <div class="text-center mb-5">
+                <div class="brand-sq-icon mb-3">
+                    <i class="bi bi-calendar-plus text-white fs-2"></i>
+                </div>
+                <h2 class="fw-bold brand-text-dark text-uppercase">New Election Session</h2>
+                <div class="brand-divider mx-auto"></div>
+                <p class="text-secondary small mt-3 px-lg-5">
+                    Initialize a new voting period. Once created, you will be able to add positions and register candidates for this session.
+                </p>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4 brand-card">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label brand-label">Election Title</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-type ms-3"></i>
+                                    {{ form.title }}
+                                </div>
+                                {% if form.title.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.title.errors.0 }}</div>{% endif %}
+                                <div class="form-text ms-3 x-small opacity-50">e.g., Student Guild Council 2026</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label brand-label">Start Date & Time</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-calendar-check ms-3"></i>
+                                    {{ form.start_time }}
+                                </div>
+                                {% if form.start_time.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.start_time.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label brand-label">End Date & Time</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-calendar-x ms-3"></i>
+                                    {{ form.end_time }}
+                                </div>
+                                {% if form.end_time.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.end_time.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label brand-label">Election Description</label>
+                                <div class="brand-input-wrapper flex-column align-items-start rounded-4 py-2">
+                                    <div class="d-flex align-items-center w-100 px-3 pt-1 mb-1">
+                                        <i class="bi bi-info-circle-fill me-2 small opacity-50"></i>
+                                        <span class="x-small fw-bold opacity-50 text-uppercase">Session Brief</span>
+                                    </div>
+                                    {{ form.description }}
+                                </div>
+                                {% if form.description.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.description.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn brand-btn-primary btn-lg rounded-pill fw-bold py-3 shadow">
+                                CREATE ELECTION SESSION
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-link btn-sm text-secondary text-decoration-none mt-3">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-dark { color: var(--brand-dark); letter-spacing: 1px; }
+    .brand-label { font-size: 0.7rem; font-weight: 700; text-uppercase: uppercase; color: #666; letter-spacing: 1px; margin-left: 1rem; }
+    .x-small { font-size: 0.75rem; }
+    .brand-divider { width: 40px; height: 3px; background-color: var(--brand-red); border-radius: 2px; }
+
+    .brand-sq-icon {
+        background-color: var(--brand-red);
+        width: 60px; height: 60px; line-height: 60px;
+        border-radius: 16px; display: inline-block;
+        box-shadow: 0 10px 20px rgba(163, 32, 32, 0.2);
+    }
+
+    /* Seamless Pill Inputs */
+    .brand-input-wrapper {
+        display: flex; align-items: center;
+        background-color: var(--bs-body-bg);
+        border: 1.5px solid var(--bs-border-color);
+        border-radius: 50rem;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+
+    .brand-input-wrapper i { color: #adb5bd; transition: color 0.2s; }
+
+    .brand-input-wrapper input, .brand-input-wrapper textarea {
+        border: none !important; background: transparent !important;
+        box-shadow: none !important; padding: 0.8rem 1rem !important;
+        flex: 1; color: var(--bs-body-color); font-weight: 500;
+        width: 100%;
+    }
+
+    .brand-input-wrapper textarea { min-height: 120px; }
+
+    .brand-input-wrapper:focus-within {
+        border-color: var(--brand-red) !important;
+        box-shadow: 0 0 0 4px rgba(163, 32, 32, 0.1) !important;
+    }
+    .brand-input-wrapper:focus-within i { color: var(--brand-red); }
+
+    .brand-btn-primary {
+        background-color: var(--brand-red) !important;
+        border: none; color: white !important;
+    }
+
+    [data-bs-theme="dark"] .brand-card { background-color: #1a1a1a; }
+</style>
+{% endblock %}

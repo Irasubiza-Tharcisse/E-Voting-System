@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Candidate | Election Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-7">
+            
+            <div class="text-center mb-5">
+                <div class="brand-sq-icon mb-3">
+                    <i class="bi bi-person-badge-fill text-white fs-2"></i>
+                </div>
+                <h2 class="fw-bold brand-text-dark text-uppercase">New Candidate</h2>
+                <div class="brand-divider mx-auto"></div>
+                <p class="text-secondary small mt-3">Position: <span class="fw-bold brand-accent-text">{{ position.title }}</span></p>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4 brand-card">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-4">
+                            <div class="col-12 text-center mb-2">
+                                <label class="brand-label d-block mb-3">Candidate Profile Picture</label>
+                                <div class="position-relative d-inline-block">
+                                    <div class="profile-preview-container mb-3">
+                                        <img id="imagePreview" src="https://ui-avatars.com/api/?name=Candidate&background=f0f0f0&color=adb5bd" alt="Preview">
+                                    </div>
+                                    <label for="id_profile_pic" class="btn btn-sm btn-dark rounded-circle position-absolute bottom-0 end-0 mb-3 me-1 shadow">
+                                        <i class="bi bi-camera-fill"></i>
+                                    </label>
+                                    <input type="file" name="profile_pic" id="id_profile_pic" class="d-none" accept="image/*" onchange="previewImage(this)">
+                                </div>
+                                {% if form.profile_pic.errors %}<div class="text-danger x-small">{{ form.profile_pic.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label brand-label">Full Name</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-person-bounding-box ms-3"></i>
+                                    {{ form.name }}
+                                </div>
+                                {% if form.name.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.name.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label brand-label">Candidate Manifesto</label>
+                                <div class="brand-input-wrapper flex-column align-items-start rounded-4 py-2">
+                                    <div class="d-flex align-items-center w-100 px-3 pt-1 mb-1">
+                                        <i class="bi bi-chat-left-text-fill me-2"></i>
+                                        <span class="small fw-bold opacity-50 text-uppercase">Vision Statement</span>
+                                    </div>
+                                    {{ form.bio }}
+                                </div>
+                                {% if form.bio.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.bio.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn brand-btn-primary btn-lg rounded-pill fw-bold py-3 shadow">
+                                REGISTER CANDIDATE
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-link btn-sm text-secondary text-decoration-none mt-3">Cancel and Return</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* --- Brand Color Definitions --- */
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-dark { color: var(--brand-dark); letter-spacing: 1px; }
+    .brand-accent-text { color: var(--brand-red); }
+    .brand-label { font-size: 0.7rem; font-weight: 700; text-uppercase: uppercase; color: #666; letter-spacing: 1px; }
+    .x-small { font-size: 0.75rem; }
+
+    .brand-divider { width: 40px; height: 3px; background-color: var(--brand-red); border-radius: 2px; }
+
+    .brand-sq-icon {
+        background-color: var(--brand-red);
+        width: 60px; height: 60px; line-height: 60px;
+        border-radius: 16px; display: inline-block;
+        box-shadow: 0 10px 20px rgba(163, 32, 32, 0.2);
+    }
+
+    /* Profile Pic Preview Styling */
+    .profile-preview-container {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    .profile-preview-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Seamless Pill Inputs */
+    .brand-input-wrapper {
+        display: flex; align-items: center;
+        background-color: var(--bs-body-bg);
+        border: 1.5px solid var(--bs-border-color);
+        border-radius: 50rem;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+
+    .brand-input-wrapper i { color: #adb5bd; transition: color 0.2s; }
+
+    .brand-input-wrapper input, .brand-input-wrapper textarea {
+        border: none !important; background: transparent !important;
+        box-shadow: none !important; padding: 0.8rem 1rem !important;
+        flex: 1; color: var(--bs-body-color); font-weight: 500;
+        width: 100%;
+    }
+
+    .brand-input-wrapper:focus-within {
+        border-color: var(--brand-red) !important;
+        box-shadow: 0 0 0 4px rgba(163, 32, 32, 0.1) !important;
+    }
+    .brand-input-wrapper:focus-within i { color: var(--brand-red); }
+
+    /* Action Button */
+    .brand-btn-primary {
+        background-color: var(--brand-red) !important;
+        border: none !important; color: white !important;
+    }
+
+    [data-bs-theme="dark"] .brand-card { background-color: #1a1a1a; }
+</style>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}

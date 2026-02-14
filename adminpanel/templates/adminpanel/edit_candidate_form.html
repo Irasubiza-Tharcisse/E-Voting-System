@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Candidate | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-7">
+            
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none brand-text-red fw-bold small">DASHBOARD</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'candidate_manage' election.id %}" class="text-decoration-none brand-text-red fw-bold small">CANDIDATES</a></li>
+                    <li class="breadcrumb-item active small text-uppercase" aria-current="page">Modify Profile</li>
+                </ol>
+            </nav>
+
+            <div class="card border-0 shadow-lg rounded-4 brand-card overflow-hidden">
+                <div class="card-header bg-dark text-white py-3 px-4 border-0">
+                    <h5 class="card-title mb-0 small fw-bold text-uppercase tracking-wider">
+                        <i class="bi bi-pencil-square me-2 brand-text-red"></i> Edit Candidate Profile
+                    </h5>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <div class="text-center mb-5">
+                            <label class="brand-label d-block mb-3">Candidate Photo</label>
+                            <div class="position-relative d-inline-block">
+                                <div class="profile-preview-container mb-3" id="previewWrapper">
+                                    {% if candidate.photo %}
+                                        <img src="{{ candidate.photo.url }}" id="imgPreview" alt="Profile">
+                                    {% else %}
+                                        <div id="imgPlaceholder" class="brand-avatar-placeholder">
+                                            <i class="bi bi-person-fill display-4"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <label for="id_photo" class="btn btn-sm btn-dark rounded-circle position-absolute bottom-0 end-0 mb-3 me-1 shadow">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                                <input type="file" name="photo" id="id_photo" class="d-none" accept="image/*" onchange="previewImage(this)">
+                            </div>
+                            {% if form.photo.errors %}<div class="text-danger x-small mt-2">{{ form.photo.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label brand-label">Full Name</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-person-bounding-box ms-3"></i>
+                                    {{ form.name }}
+                                </div>
+                                {% if form.name.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.name.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label brand-label">Assigned Position</label>
+                                <div class="brand-input-wrapper">
+                                    <i class="bi bi-award ms-3"></i>
+                                    {{ form.position }}
+                                </div>
+                                {% if form.position.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.position.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label brand-label">Manifesto / Bio</label>
+                                <div class="brand-input-wrapper flex-column align-items-start rounded-4 py-2">
+                                    <div class="px-3 pt-1 mb-1 d-flex align-items-center opacity-50">
+                                        <i class="bi bi-chat-left-text-fill me-2 small"></i>
+                                        <span class="x-small fw-bold text-uppercase">Vision Statement</span>
+                                    </div>
+                                    {{ form.manifesto }}
+                                </div>
+                                {% if form.manifesto.errors %}<div class="text-danger x-small mt-1 ms-2">{{ form.manifesto.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row gap-3 mt-5">
+                            <button type="submit" class="btn brand-btn-primary btn-lg rounded-pill fw-bold py-3 px-5 shadow flex-grow-1">
+                                SAVE CHANGES
+                            </button>
+                            <a href="{% url 'candidate_manage' election.id %}" class="btn btn-outline-dark btn-lg rounded-pill py-3 px-4">
+                                CANCEL
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-danger bg-opacity-10 border-0 p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0 fw-bold text-danger small text-uppercase">Danger Zone</h6>
+                            <p class="mb-0 x-small text-secondary">Permanently withdraw this candidate from the election.</p>
+                        </div>
+                        <form action="{% url 'candidate_delete' candidate.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('WARNING: This action cannot be undone. Delete candidate?')">
+                                Delete Candidate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-red { color: var(--brand-red) !important; }
+    .brand-label { font-size: 0.7rem; font-weight: 700; text-uppercase: uppercase; color: #666; letter-spacing: 1px; margin-left: 1rem; }
+    .x-small { font-size: 0.75rem; }
+    .tracking-wider { letter-spacing: 1.5px; }
+
+    /* Profile Preview Squircles */
+    .profile-preview-container {
+        width: 140px; height: 140px;
+        border-radius: 24px; /* Squircle style */
+        border: 4px solid white;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    .profile-preview-container img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .brand-avatar-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        background: #eee; color: #adb5bd;
+    }
+
+    /* Seamless Pill Inputs */
+    .brand-input-wrapper {
+        display: flex; align-items: center;
+        background-color: var(--bs-body-bg);
+        border: 1.5px solid var(--bs-border-color);
+        border-radius: 50rem;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+    .brand-input-wrapper i { color: #adb5bd; transition: color 0.2s; }
+    .brand-input-wrapper input, .brand-input-wrapper select, .brand-input-wrapper textarea {
+        border: none !important; background: transparent !important;
+        box-shadow: none !important; padding: 0.8rem 1rem !important;
+        flex: 1; color: var(--bs-body-color); font-weight: 500; width: 100%;
+    }
+    .brand-input-wrapper textarea { min-height: 100px; }
+    .brand-input-wrapper:focus-within {
+        border-color: var(--brand-red) !important;
+        box-shadow: 0 0 0 4px rgba(163, 32, 32, 0.1) !important;
+    }
+    .brand-input-wrapper:focus-within i { color: var(--brand-red); }
+
+    .brand-btn-primary {
+        background-color: var(--brand-red) !important;
+        border: none; color: white !important;
+    }
+
+    [data-bs-theme="dark"] .brand-card { background-color: #1a1a1a; }
+    [data-bs-theme="dark"] .brand-avatar-placeholder { background: #2b2b2b; }
+</style>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                const wrapper = document.getElementById('previewWrapper');
+                wrapper.innerHTML = `<img src="${e.target.result}" id="imgPreview" alt="Profile">`;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}

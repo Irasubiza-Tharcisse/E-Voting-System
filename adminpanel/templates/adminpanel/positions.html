@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Positions | {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-8 text-center text-md-start">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none brand-text-red fw-bold small">DASHBOARD</a></li>
+                    <li class="breadcrumb-item active small text-uppercase tracking-wider" aria-current="page">{{ election.title }}</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold brand-text-dark text-uppercase mb-0">Election Positions</h2>
+            <div class="brand-divider mt-2 d-none d-md-block"></div>
+        </div>
+        <div class="col-md-4 text-md-end mt-4 mt-md-0">
+            <a href="{% url 'position_create' election.id %}" class="btn brand-btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-circle me-2"></i> ADD POSITION
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 brand-card-light">
+                <div class="d-flex align-items-center">
+                    <div class="brand-icon-box me-3">
+                        <i class="bi bi-layers-fill fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary mb-0 small text-uppercase fw-bold tracking-tight">Defined Roles</h6>
+                        <h4 class="mb-0 fw-bold brand-text-dark">{{ positions|length }} Positions</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden brand-main-card">
+        <div class="card-header bg-dark text-white py-3 px-4 d-flex justify-content-between align-items-center border-0">
+            <h5 class="mb-0 small fw-bold text-uppercase tracking-wider">Role Registry</h5>
+            <span class="badge rounded-pill bg-danger px-3 py-2 small">{{ election.title }}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-body-secondary text-secondary small text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3" style="width: 35%;">Position Title</th>
+                        <th style="width: 35%;">Enrolled Candidates</th>
+                        <th class="text-center" style="width: 15%;">Voting Limit</th>
+                        <th class="text-end pe-4" style="width: 15%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for position in positions %}
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="brand-squircle-icon me-3">
+                                    <i class="bi bi-person-badge fs-5"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold brand-text-dark">{{ position.title }}</h6>
+                                    <code class="x-small brand-text-red">ROLE_ID: #{{ position.id|stringformat:"03d" }}</code>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="candidate-stack d-flex align-items-center">
+                                {% for candidate in position.candidates.all %}
+                                    {% if candidate.photo %}
+                                        <div class="stack-item" data-bs-toggle="tooltip" title="{{ candidate.name }}">
+                                            <img src="{{ candidate.photo.url }}" 
+                                                 class="rounded-circle border border-2 border-white shadow-sm" 
+                                                 alt="{{ candidate.name }}">
+                                        </div>
+                                    {% else %}
+                                        <div class="stack-item" data-bs-toggle="tooltip" title="{{ candidate.name }}">
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white border border-2 border-white shadow-sm">
+                                                <i class="bi bi-person-fill x-small"></i>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="text-muted small fst-italic">No candidates registered</span>
+                                {% endfor %}
+                                {% if position.candidates.count > 0 %}
+                                    <span class="ms-2 badge brand-badge-red rounded-pill x-small fw-bold">
+                                        {{ position.candidates.count }} TOTAL
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-dark-subtle text-dark border px-3 py-2 fw-medium">
+                                Max: {{ position.max_votes|default:"1" }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group rounded-pill overflow-hidden border shadow-sm bg-white">
+                                <a href="{% url 'position_edit' position.id %}" class="btn btn-white btn-sm px-3" data-bs-toggle="tooltip" title="Modify Role">
+                                    <i class="bi bi-pencil-square brand-text-red"></i>
+                                </a>
+                                <form action="{% url 'position_delete' position.id %}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Deleting this position will remove all assigned candidates. Proceed?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-white btn-sm px-3 border-start" data-bs-toggle="tooltip" title="Remove Role">
+                                        <i class="bi bi-trash3 text-dark"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="brand-text-red opacity-25 mb-3">
+                                <i class="bi bi-layers-half display-1"></i>
+                            </div>
+                            <h5 class="fw-bold brand-text-dark">Registry is Empty</h5>
+                            <p class="text-muted mb-4 small">No positions have been defined for this session yet.</p>
+                            <a href="{% url 'position_create' election.id %}" class="btn brand-btn-primary rounded-pill px-4">
+                                <i class="bi bi-plus-lg me-2"></i> DEFINE FIRST ROLE
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --brand-red: #A32020;
+        --brand-dark: #121212;
+    }
+
+    .brand-text-red { color: var(--brand-red) !important; }
+    .brand-text-dark { color: var(--brand-dark) !important; }
+    .brand-divider { width: 60px; height: 4px; background: var(--brand-red); border-radius: 2px; }
+    .x-small { font-size: 0.7rem; }
+    .tracking-wider { letter-spacing: 1.5px; }
+
+    /* Icons and Boxes */
+    .brand-icon-box {
+        background-color: var(--brand-red);
+        width: 50px; height: 50px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(163, 32, 32, 0.2);
+    }
+
+    .brand-squircle-icon {
+        width: 42px; height: 42px;
+        background-color: #f8f9fa;
+        color: var(--brand-dark);
+        border-radius: 12px; /* Squircle */
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    tr:hover .brand-squircle-icon {
+        background-color: var(--brand-red);
+        color: white;
+        transform: rotate(-5deg);
+    }
+
+    /* Candidate Avatar Stack */
+    .candidate-stack { margin-left: 10px; }
+    .stack-item { margin-left: -12px; transition: transform 0.2s; position: relative; }
+    .stack-item img, .stack-item .rounded-circle {
+        width: 36px; height: 36px;
+        object-fit: cover;
+    }
+    .stack-item:hover { transform: translateY(-5px); z-index: 10; }
+
+    /* Buttons and Badges */
+    .brand-btn-primary {
+        background-color: var(--brand-red) !important;
+        border: none; color: white !important;
+        font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;
+    }
+    .brand-badge-red { background: rgba(163, 32, 32, 0.1); color: var(--brand-red); border: 1px solid rgba(163, 32, 32, 0.2); }
+
+    .brand-main-card { background-color: var(--bs-body-tertiary); }
+
+    [data-bs-theme="dark"] .brand-squircle-icon { background-color: #2b2b2b; color: #adb5bd; }
+    [data-bs-theme="dark"] .stack-item img, [data-bs-theme="dark"] .stack-item .rounded-circle { border-color: #1a1a1a !important; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el) })
+    });
+</script>
+{% endblock %}
