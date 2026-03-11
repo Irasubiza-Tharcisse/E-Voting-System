@@ -26,7 +26,7 @@ SECRET_KEY = '123'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 
 
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 
 # Security settings
 DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 SECRET_KEY = 'keep-this-secret-and-use-env-variable'
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
@@ -60,7 +60,8 @@ SECURE_SSL_REDIRECT = False  # redirect HTTP -> HTTPS
 
 
 MIDDLEWARE = [
-
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
