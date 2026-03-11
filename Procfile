@@ -1,1 +1,1 @@
-web: gunicorn evoting.wsgi
+web: gunicorn E_voting_system.wsgi
